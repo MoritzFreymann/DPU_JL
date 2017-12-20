@@ -107,12 +107,13 @@ bool cSPUCooperation_and_Interface::Prepare()
 	// Interface
 	// ==========================================================================================
 	// Generate Visual Objects
-	this->BaselayerCircleBig = new VisualObject(0, 0, 0, new ColorRGBA(0.6, 0.6, 0.6, 0.8), 0, false);					// Hintergrung fuer Timer und Pfeile
+	this->BaselayerCircleBig = new VisualObject(0, 0, 0, new ColorRGBA(0.6, 0.6, 0.6, 0.8), 0, false);				// Hintergrung fuer Timer und Pfeile
 	this->BaselayerCircleLeft = new VisualObject(0, 0, 0, new ColorRGBA(0.96, 0.33, 0.26, 0.9), 0, false);			// Hintergrund fuer Reject-Icon
 	this->BaselayerCircleRight = new VisualObject(0, 0, 0, new ColorRGBA(0.18, 0.8, 0.44, 0.9), 0, false);			// Hintergrund fuer Accept_Icon
 	this->BaselayerCircleLeftMiddle = new VisualObject(0, 0, 0, new ColorRGBA(0.96, 0.33, 0.26, 0.9), 0, false);	// Hintergrund fuer Reject-Icon
 	this->BaselayerCircleRightMiddle = new VisualObject(0, 0, 0, new ColorRGBA(0.18, 0.8, 0.44, 0.9), 0, false);	// Hintergrund fuer Accept_Icon
 
+	this->IconTOR = new VisualObject(0, 0, 0, new ColorRGBA(0.18, 0.8, 0.44, 0.9), 0, false);							// TOR-Icon
 	this->IconReject = new VisualObject(0, 0, 0, new ColorRGBA(0.04,0.59,0.27,0.9), 0, false);			// Reject-Icon
 	this->IconAccept = new VisualObject(0, 0, 0, new ColorRGBA(0.04,0.59,0.27,0.9), 0, false);			// Accept_Icon
 	this->IconRejectMiddle = new VisualObject(0, 0, 0, new ColorRGBA(0.04,0.59,0.27,0.9), 0, false);	// Reject-Icon
@@ -248,6 +249,8 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 		break;	// exit switch, so trigger can go on
 	// TOR
 	case TOR:
+		// do
+		this->doTOR();
 		// transition
 		if ( (double)m_Data.mi_RequestID_In < 0 )	// no request
 		{
@@ -412,10 +415,6 @@ void cSPUCooperation_and_Interface::handleAcception()
 	g_LogSys << "DPUCooperativeMotorwayMerge: Cooperation is started " << endl;
 	this->accepted_arr[this->pos] = 1;
 
-	//// show state to driver
-	//this->IconAcceptMiddle->setVisibility(true, 20);			// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
-	//this->BaselayerCircleRightMiddle->setVisibility(true, 20);	// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
-
 	if (this->decisionDefault)
 	{
 		// default
@@ -463,7 +462,7 @@ void cSPUCooperation_and_Interface::entryCooperation_TOR()
 {
 	// ==========================================================================================
 	// entry-function of state COOPERATION and TOR
-	// turns off sounds and hides objects
+	// turns off sounds
 	// ==========================================================================================
 
 	// turning off sound 
@@ -481,8 +480,21 @@ void cSPUCooperation_and_Interface::doCooperation()
 	// ==========================================================================================
 
 	// show state to driver
-	this->IconAcceptMiddle->setVisibility(true, 20);			// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
-	this->BaselayerCircleRightMiddle->setVisibility(true, 20);	// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
+	if (this->accepted)
+	{
+		this->IconAcceptMiddle->setVisibility(true, 5);			
+		this->BaselayerCircleRightMiddle->setVisibility(true, 5);	
+
+	}
+	else if(this->rejected)
+	{
+		this->IconRejectMiddle->setVisibility(true, 5);			
+		this->BaselayerCircleLeftMiddle->setVisibility(true, 5);	
+
+	}
+	else
+	{
+	};
 
 	if (this->type == REQUEST_LANECHANGE) 
 	{
@@ -497,6 +509,11 @@ void cSPUCooperation_and_Interface::doCooperation()
 	}
 }
 
+void cSPUCooperation_and_Interface::doTOR()
+{
+	this->IconTOR->setVisibility(true, 5);		
+}
+
 void cSPUCooperation_and_Interface::gotoIDLE()
 {
 	// ==========================================================================================
@@ -505,9 +522,6 @@ void cSPUCooperation_and_Interface::gotoIDLE()
 	// hides objects of Action
 	// ==========================================================================================
 	g_LogSys << "DPUCooperativeMotorwayMerge: IDLE" << endl;
-
-	this->BaselayerCircleLeft->setColor(new ColorRGBA(0.96, 0.33, 0.26, 0.9));
-	this->BaselayerCircleRight->setColor(new ColorRGBA(0.18, 0.8, 0.44, 0.9));
 
 	this->accepted = false;
 	this->rejected = false;
@@ -531,6 +545,7 @@ void cSPUCooperation_and_Interface::gotoIDLE()
 		this->BaselayerDefaultC->setVisibility(false, 20);
 	}
 
+	this->IconTOR->setVisibility(false, 20);	
 	this->showInterface(false, 20);
 	this->ArrowDown->setVisibility(false, 20);
 	this->ArrowLeft->setVisibility(false, 20);
@@ -602,7 +617,6 @@ void cSPUCooperation_and_Interface::mapOutput()
 	// Cooperation
 
 	// cookie
-	m_Data.md_velocity_Out = this->v;
 	m_Data.mi_CooperationState_Out = this->state;
 	m_Data.md_DecisionTime_Out = this->decisionTime;
 	m_Data.mi_LaneChange_Out = this->laneChange;
@@ -677,6 +691,10 @@ void cSPUCooperation_and_Interface::mapOutput()
 	m_Data.mb_ObjTimerVisible_Out = Timer->getVisibility();
 	m_Data.md_ObjTimerOpacity_Out = Timer->getOpacity();
 	m_Data.md_ObjTimerValue_Out = Timer->getValue();
+
+	// TOR
+	m_Data.mb_ObjhandsOnBigVisible_Out = IconTOR->getVisibility();
+	m_Data.md_ObjhandsOnBigOpacity_Out = IconTOR->getOpacity();
 
 	//
 	m_Data.mb_ObjBaselayerCircleLeftMiddleVisible_Out = BaselayerCircleLeftMiddle->getVisibility();
