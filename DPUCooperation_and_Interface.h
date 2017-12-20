@@ -67,8 +67,6 @@ struct SPUCooperation_and_Interface_API sSPUCooperation_and_Interface
 	// ==========================================================================================
 	// Cooperation
 	// ==========================================================================================
-
-	cVar md_velocity_Out;
 	cVar mi_CooperationState_Out;
 	cVar md_DecisionTime_Out;
 	cVar mb_Accepted_Out;
@@ -230,7 +228,6 @@ struct SPUCooperation_and_Interface_API sSPUCooperation_and_Interface
 		// ==========================================================================================
 		// Cooperation
 		// ==========================================================================================	
-		VARInitO(md_velocity_Out);
 		VARInitO(mi_CooperationState_Out);
 		VARInitO(md_DecisionTime_Out);
 		VARInitO(mb_Accepted_Out);
@@ -419,13 +416,15 @@ protected:
 
 	void handleAcception();
 
-	void doCooperation();
-
 	void gotoIDLE();
 
 	void disableAutomation();
 
 	void entryCooperation_TOR();
+
+	void doCooperation();
+
+	void doTOR();
 
 	void exitIDLE();
 
@@ -463,7 +462,7 @@ protected:
 	double v_start;	// velocity befor slowdown
 	double v_end;	// velocity after slowdown
 	double delta_v;	// v_end - v_start (delta_v < 0)
-	double v;		// new velocity, which is given to
+	double v;		// new velocity, which is given to targetspeed_out
 
 	bool playDefaultSound;
 
@@ -502,6 +501,7 @@ protected:
 	VisualObject * ArrowLeft;
 	VisualObject * Street;
 	VisualObject * Timer;
+	VisualObject * IconTOR;
 
 	VisualObject * Default0;
 	VisualObject * Default1;
