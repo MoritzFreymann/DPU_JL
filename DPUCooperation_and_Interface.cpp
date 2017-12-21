@@ -115,7 +115,7 @@ bool cSPUCooperation_and_Interface::Prepare()
 	this->BaselayerCircleLeftMiddle = new VisualObject(0, 0, 0, new ColorRGBA(0.96, 0.33, 0.26, 0.9), 0, false);	// Hintergrund fuer Reject-Icon
 	this->BaselayerCircleRightMiddle = new VisualObject(0, 0, 0, new ColorRGBA(0.18, 0.8, 0.44, 0.9), 0, false);	// Hintergrund fuer Accept_Icon
 
-	this->IconTOR = new VisualObject(0, 0, 0, new ColorRGBA(0.18, 0.8, 0.44, 0.9), 0, false);							// TOR-Icon
+	this->IconTOR = new VisualObject(0, 0, 0, new ColorRGBA(0.18, 0.8, 0.44, 0.9), 0, false);			// TOR-Icon
 	this->IconReject = new VisualObject(0, 0, 0, new ColorRGBA(0.04,0.59,0.27,0.9), 0, false);			// Reject-Icon
 	this->IconAccept = new VisualObject(0, 0, 0, new ColorRGBA(0.04,0.59,0.27,0.9), 0, false);			// Accept_Icon
 	this->IconRejectMiddle = new VisualObject(0, 0, 0, new ColorRGBA(0.04,0.59,0.27,0.9), 0, false);	// Reject-Icon
@@ -157,7 +157,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 			this->exitIDLE();
 		}
 
-		break;	// exit switch, so trigger can go on
+		break;	
 
 	// DELAY
 	case DELAY:
@@ -167,7 +167,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 		{
 			this->state = REQUEST;
 		}
-		break;	// exit switch, so trigger can go on
+		break;	
 
 	// REQUEST
 	case REQUEST:
@@ -196,7 +196,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 			// exit-function
 			this->exitREQUEST();
 		}
-		break;	// exit switch, so trigger can go on
+		break;	
 
 	// REJECT
 	case REJECT:
@@ -212,7 +212,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 		{
 			this->state = TOR;
 		}
-		break;	// exit switch, so trigger can go on
+		break;	
 
 	// ACCEPT
 	case ACCEPT:
@@ -228,7 +228,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 		{
 			this->state = TOR;
 		}
-		break;	// exit switch, so trigger can go on
+		break;	
 
 	// STOP_AUTOMATION
 	case STOP_AUTOMATION:
@@ -237,7 +237,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 
 		//transition
 		this->state = TOR;
-		break;	// exit switch, so trigger can go on
+		break;
 
 	// COOPERATION
 	case COOPERATION:
@@ -251,7 +251,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 			// exit
 			this->gotoIDLE();
 		}
-		break;	// exit switch, so trigger can go on
+		break;	
 	// TOR
 	case TOR:
 		// do
@@ -264,10 +264,10 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 			// exit
 			this->gotoIDLE();
 		}
-		break;	// exit switch, so trigger can go on
+		break;	
 
 	default:
-		break;	// exit switch, so trigger can go on
+		break;	
 		
 	}
 
