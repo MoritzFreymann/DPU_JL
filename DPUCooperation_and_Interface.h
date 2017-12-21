@@ -434,7 +434,8 @@ protected:
 
 	void showDefaultAction(bool show, double speed);
 
-	Linear * LinearTimer;
+	// Timer
+	Linear * LinearTimer;	
 
 	double decisionTime;
 
@@ -449,7 +450,7 @@ protected:
 	int type;			// current type of request
 	int defaultAction;
 	int laneChange;
-	double targetSpeed;
+	double targetSpeed;	// Speed the EGO-Car is supposed to get
 
 	bool decisionTime_over;
 	bool decisionDefault;
@@ -468,7 +469,7 @@ protected:
 
 	bool blinkerStart;
 	bool blinkerOn;
-	bool automationEnabled;
+	bool automationEnabled;	// returns if automation should be enabled
 
 	int *accepted_arr;
 	int *rejected_arr;

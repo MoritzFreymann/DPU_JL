@@ -49,6 +49,7 @@ bool cSPUCooperation_and_Interface::Prepare()
 	double delta_v = 0;				// v_end - v_start (delta_v < 0)
 	double v = 0;					// new velocity, which is given to
 
+	// Accepted-Array
 	this->accepted_arr = new int[9];
 	this->accepted_arr[0] = 0;
 	this->accepted_arr[1] = 0;
@@ -59,6 +60,7 @@ bool cSPUCooperation_and_Interface::Prepare()
 	this->accepted_arr[6] = 0;
 	this->accepted_arr[7] = 0;
 	this->accepted_arr[8] = 0;
+	// Rejected-Array
 	this->rejected_arr = new int[9];
 	this->rejected_arr[0] = 0;
 	this->rejected_arr[1] = 0;
@@ -216,6 +218,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 	case ACCEPT:
 		// entry
 		this->handleAcception();
+
 		//transition
 		if(m_Data.mi_AutomationActive_In == 1)
 		{
@@ -231,6 +234,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 	case STOP_AUTOMATION:
 		//entry
 		this->disableAutomation();
+
 		//transition
 		this->state = TOR;
 		break;	// exit switch, so trigger can go on
@@ -239,6 +243,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 	case COOPERATION:
 		// do
 		this->doCooperation();
+
 		// transition
 		if ((double)m_Data.mi_RequestID_In < 0 || this->cooperation_finished)	// no request or cooperation finished
 		{
@@ -251,6 +256,7 @@ void cSPUCooperation_and_Interface::Trigger(double d_TimeMS, double d_TimeErrorM
 	case TOR:
 		// do
 		this->doTOR();
+
 		// transition
 		if ( (double)m_Data.mi_RequestID_In < 0 )	// no request
 		{
@@ -287,7 +293,8 @@ void cSPUCooperation_and_Interface::handleRequest(double d_TimeMS)
 {
 	// ==========================================================================================
 	// do-function of state REQUEST
-	// starts the timer for the transition time and sets objects visibilty to 'true'
+	// starts the timer for the transition time and sets interface-objects visibilty to 'true' 
+	// and plays request sound
 	// checks, if the transtion condition 'decisionTime_over' is true
 	// ==========================================================================================
 
@@ -330,8 +337,6 @@ void cSPUCooperation_and_Interface::handleRequest(double d_TimeMS)
 		this->decisionTime_over = true;
 		this->decisionDefault = true;
 
-		// reset trigger
-		this->LinearTimer->resetTrigger();
 	}
 }
 
@@ -342,9 +347,9 @@ void cSPUCooperation_and_Interface::exitREQUEST()
 	// resets timer and hides objects
 	// ==========================================================================================
 
-	this->LinearTimer->stop();
-	this->LinearTimer->resetTrigger();
-	this->playRequestSound = false;
+	this->LinearTimer->stop();			// stop timer
+	this->LinearTimer->resetTrigger();	// reset trigger
+	this->playRequestSound = false;		// turns off request sound
 
 	// Hide objects
 	this->showInterface(false, 20);
@@ -363,23 +368,13 @@ void cSPUCooperation_and_Interface::handleRejection()
 	// entry-function of state REJECTION
 	// sets the variable 'rejected' true
 	// sets at the current position of rejected_arr to '1' to remeber the request was rejected
-	// informs driver, that request was rejeted
 	// ==========================================================================================
 
+	g_LogSys << "DPUCooperativeMotorwayMerge: Cooperation rejected " << endl; // output to console
+
 	this->rejected = true;
-	//g_LogSys << "DPUCooperativeMotorwayMerge: Cooperation rejected " << endl;
-	g_LogSys << "DPUCooperativeMotorwayMerge: VR slow down " << endl;
+
 	this->rejected_arr[this->pos] = 1;
-
-	// show state to driver
-	this->IconRejectMiddle->setVisibility(true, 20);			// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
-	this->BaselayerCircleLeftMiddle->setVisibility(true, 20);	// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
-
-	if (this->decisionDefault)
-	{
-		// default
-		this->BaselayerDefaultB->setVisibility(true, 20);	// speed = 20, damit in einem Zeitschritt das Interface gezeigt werden kann
-	}
 
 	// hide all the other objects
 	this->BaselayerCircleLeft->setVisibility(false, 20);
@@ -400,7 +395,6 @@ void cSPUCooperation_and_Interface::handleAcception()
 	// sets the variable 'accepted' true
 	// sets at the current position of accepted_arr to '1' to remeber the request was accepted
 	// gets all needed values for the function 'Slowdown'
-	// informs driver, that request was accepted
 	// ==========================================================================================
 
 	this->x_start = m_Data.md_position_x;					// get current position;
@@ -415,12 +409,6 @@ void cSPUCooperation_and_Interface::handleAcception()
 	g_LogSys << "DPUCooperativeMotorwayMerge: Cooperation is started " << endl;
 	this->accepted_arr[this->pos] = 1;
 
-	if (this->decisionDefault)
-	{
-		// default
-		this->BaselayerDefaultA->setVisibility(true, 20);
-	}
-
 	// hide all the other objects
 	this->BaselayerCircleLeft->setVisibility(false, 20);
 	this->BaselayerCircleRight->setVisibility(false, 20);
@@ -428,9 +416,9 @@ void cSPUCooperation_and_Interface::handleAcception()
 	this->IconAccept->setVisibility(false, 20);
 	this->showDefaultAction(false, 20);
 	this->Default2->setVisibility(false, 20);
+
 	// play sound
 	this->playAcceptSound = true;
-
 
 }
 
@@ -445,6 +433,7 @@ void cSPUCooperation_and_Interface::disableAutomation()
 
 	this->BaselayerDefaultC->setVisibility(true, 0.5);	// show TOR-Icon in HUD
 	this->playDefaultSound = 1;							// play TOR-Sound
+	this->automationEnabled = 0;						//disable Automation
 	// hide objects
 	this->BaselayerCircleLeft->setVisibility(false, 20);
 	this->BaselayerCircleRight->setVisibility(false, 20);
@@ -454,8 +443,6 @@ void cSPUCooperation_and_Interface::disableAutomation()
 	this->Default2->setVisibility(false, 20);
 	g_LogSys << "DPUCooperativeMotorwayMerge: Automation gets disabled " << endl;
 	this->rejected_arr[this->pos] = 1;
-	this->automationEnabled = 0;	//disable Automation
-
 }
 
 void cSPUCooperation_and_Interface::entryCooperation_TOR()
@@ -476,34 +463,52 @@ void cSPUCooperation_and_Interface::doCooperation()
 {
 	// ==========================================================================================
 	// do-function of state COOPERATION
+	// shows state to driver
 	// does a LANECHANGE or a SLOWDOWN depending on the type of request
 	// ==========================================================================================
 
 	// show state to driver
+	// accepted
 	if (this->accepted)
 	{
-		this->IconAcceptMiddle->setVisibility(true, 5);			
-		this->BaselayerCircleRightMiddle->setVisibility(true, 5);	
+		if (this->decisionDefault)
+		{
+			// default
+			this->BaselayerDefaultA->setVisibility(true, 5);
+		}
+		else
+		{
+			this->IconAcceptMiddle->setVisibility(true, 5);
+			this->BaselayerCircleRightMiddle->setVisibility(true, 5);
+		}
 
 	}
+	// rejected
 	else if(this->rejected)
 	{
-		this->IconRejectMiddle->setVisibility(true, 5);			
-		this->BaselayerCircleLeftMiddle->setVisibility(true, 5);	
-
+		if (this->decisionDefault)
+		{
+			// default
+			this->BaselayerDefaultB->setVisibility(true, 5);
+		}
+		else
+		{
+			this->IconRejectMiddle->setVisibility(true, 5);
+			this->BaselayerCircleLeftMiddle->setVisibility(true, 5);
+		}
 	}
 	else
 	{
 	};
 
-	if (this->type == REQUEST_LANECHANGE) 
+	if (this->type == REQUEST_LANECHANGE  && this->accepted) 
 	{
 		this->laneChange = -1;	// start lanechange to left lane
 		this->blinkerStart = 1;
 		this->blinkerOn = 1;
 	}
 
-	else if (this->type == REQUEST_SLOWDOWN) 
+	else if (this->type == REQUEST_SLOWDOWN && this->accepted)
 	{
 		this->targetSpeed = SlowDown();
 	}
@@ -511,6 +516,10 @@ void cSPUCooperation_and_Interface::doCooperation()
 
 void cSPUCooperation_and_Interface::doTOR()
 {
+	// ==========================================================================================
+	// do-function of state TOR
+	// shows the TOR-Icon
+	// ==========================================================================================
 	this->IconTOR->setVisibility(true, 5);		
 }
 
